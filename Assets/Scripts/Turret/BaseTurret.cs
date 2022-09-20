@@ -38,6 +38,7 @@ public abstract class BaseTurret : MonoBehaviour
     protected int _ammo = 0;
 
     private Renderer[] _renderers;
+    private AmmoBar _ammoBar;
 
     public Transform IndicatorTransform => _indicatorTransform;
     public Image IndicatorFill => _indicatorFill;
@@ -56,6 +57,10 @@ public abstract class BaseTurret : MonoBehaviour
         _chargedAmmo = _chargedAmmoMax;
 
         Turrets.Add(this);
+
+        _ammoBar = GetComponentInChildren<AmmoBar>();
+        if (_ammoBar != null)
+            _ammoBar.ChangeValue(_chargedAmmo, _ammo);
     }
 
     private void Update()
@@ -104,16 +109,25 @@ public abstract class BaseTurret : MonoBehaviour
             _fireTimer -= Time.deltaTime;
     }
 
+    private void OnEnable()
+    {
+        if (_ammoBar != null) 
+            _ammoBar.EnableBar();
+    }
+
     private void OnDisable()
     {
         _aim.SetIdle(true);
+
+        if (_ammoBar != null) 
+            _ammoBar.DisableBar();
     }
 
     private void OnDestroy()
     {
         Turrets.Remove(this);
     }
-
+    
     protected Enemy FindTarget()
     {
         if (TargetPoint.FillBuffer(transform.localPosition, _aim.AimDistance))
@@ -158,6 +172,9 @@ public abstract class BaseTurret : MonoBehaviour
     {
         _fireTimer = _fireDelay;
         _chargedAmmo -= 1;
+
+        if (_ammoBar != null)
+            _ammoBar.ChangeValue(_chargedAmmo, _ammo);
     }
     
     protected virtual bool CanFire()
@@ -173,6 +190,9 @@ public abstract class BaseTurret : MonoBehaviour
         {
             _ammo = _ammoMax;
         }
+
+        if (_ammoBar != null)
+            _ammoBar.ChangeValue(_chargedAmmo, _ammo);
     }
 
 }
